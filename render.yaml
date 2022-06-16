@@ -22,12 +22,12 @@ services:
         value: 3.9.0
       - key: DATABASE_URL
         fromDatabase:
-          name: saleor-db-2hex
+          name: saleor-db
           property: connectionString
       - key: REDIS_URL
         fromService:
           type: redis
-          name: saleor-redis-2hex
+          name: saleor-redis
           property: connectionString
       - key: ALLOWED_CLIENT_HOSTS
         value: https://saleor-dashboard-2hex.onrender.com, saleor-storefront-2hex:10000
@@ -57,11 +57,14 @@ services:
     name: saleor-storefront
     env: node
     repo: https://github.com/dnilasor/react-storefront
-    buildCommand: pnpm install && pnpm run build && pnpm run postbuild
-    startCommand: pnpm start
+    buildCommand: NEXT_PUBLIC_API_URI="$NEXT_PUBLIC_API_HOST/graphql/"; pnpm install && pnpm run build && pnpm run postbuild
+    startCommand: NEXT_PUBLIC_API_URI="$NEXT_PUBLIC_API_HOST/graphql/"; pnpm start
     envVars:
-      - key: NEXT_PUBLIC_API_URI
-        value: https://saleor-2hex.onrender.com/graphql/
+      - key: NEXT_PUBLIC_API_HOST
+        fromService:
+          type: web
+          name: saleor
+          envVarKey: RENDER_EXTERNAL_URL
       - key: NEXT_PUBLIC_IMAGE_CONVERSION_FORMATS
         value: image/avif,image/webp
 
@@ -74,12 +77,12 @@ services:
     envVars:
       - key: DATABASE_URL
         fromDatabase:
-          name: saleor-db-2hex
+          name: saleor-db
           property: connectionString
       - key: REDIS_URL
         fromService:
           type: redis
-          name: saleor-redis-2hex
+          name: saleor-redis
           property: connectionString
       - key: PYTHON_VERSION
         value: 3.9.0
@@ -99,9 +102,9 @@ services:
     name: exchange-rates
     env: python
     schedule: "0 1 * * *"
-    buildCommand: pip3 install -r requirements.txt
-    startCommand: python manage.py update_exchange_rates --all
-    repo: https://github.com/dnilasor/saleor-blog
+    buildCommand: ./render-build.sh
+    startCommand: ./render-start.sh cron
+    repo: https://github.com/crcastle/saleor-blog
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: saleor.settings
@@ -119,12 +122,12 @@ services:
         value: 3.9.0
       - key: DATABASE_URL
         fromDatabase:
-          name: saleor-db-2hex
+          name: saleor-db
           property: connectionString
       - key: REDIS_URL
         fromService:
           type: redis
-          name: saleor-redis-2hex
+          name: saleor-redis
           property: connectionString
       - key: ALLOWED_CLIENT_HOSTS
         value: https://saleor-dashboard-2hex.onrender.com, saleor-storefront-2hex:10000
